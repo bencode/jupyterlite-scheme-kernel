@@ -41,7 +41,7 @@ export class SchemeKernel extends BaseKernel implements IKernel {
     const { code } = content
     try {
       if (!this.evaluator) {
-        this.evaluator = createEvaluator()
+        this.evaluator = await createEvaluator()
       }
       const result = this.evaluator.evaluate(code)
 

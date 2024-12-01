@@ -8,7 +8,11 @@ importers:
 
   .: {}
 
-  packages/chez: {}
+  packages/chez:
+    dependencies:
+      process:
+        specifier: ^0.11.10
+        version: 0.11.10
 
   packages/jupyterlite-scheme-kernel:
     dependencies:
