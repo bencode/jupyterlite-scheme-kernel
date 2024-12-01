@@ -1,0 +1,13 @@
+node_modules/
+
+dist
+_output/
+
+.jupyterlite.doit.db
+
+venv/
+
+jupyterlite_scheme_kernel/__pycache__
+jupyterlite_scheme_kernel/labextension
+
+packages/jupyterlite-scheme-kernel/lib/

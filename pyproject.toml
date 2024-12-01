@@ -1,0 +1,41 @@
+[build-system]
+requires = [
+    "hatchling >=1.4.0",
+    "jupyterlab >=4.2.1,<4.3.0"
+]
+build-backend = "hatchling.build"
+
+[project]
+name = "jupyterlite-scheme-kernel-canary"
+version = "0.1.1"
+description = "A Scheme Kernel for JupyterLite using `ChezScheme`"
+readme = "README.md"
+authors = [{ name = "bencode", email = "bencode@163.com" }]
+keywords = ["jupyter", "jupyterlab", "jupyterlite", "scheme", "ChezScheme"]
+license = { text = "MIT" }
+requires-python = ">=3.8"
+classifiers = [
+    "Framework :: Jupyter",
+    "Framework :: Jupyter :: JupyterLab",
+    "Framework :: Jupyter :: JupyterLab :: 4",
+    "License :: OSI Approved :: MIT License",
+]
+dependencies = ["jupyterlite-core >=0.4.0,<0.5.0"]
+
+[project.urls]
+Source = "https://github.com/bencode/jupyterlite-scheme-kernel"
+
+[project.entry-points."jupyterlite.addon.v0"]
+jupyterlite_scheme_kernel = "jupyterlite_scheme_kernel:SchemeAddon"
+
+[tool.hatch.build]
+include = ["jupyterlite_scheme_kernel"]
+artifacts = ["jupyterlite_scheme_kernel/labextension"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["jupyterlite_scheme_kernel"]
+include = ["jupyterlite_scheme_kernel"]
+artifacts = ["jupyterlite_scheme_kernel/labextension"]
+
+[tool.hatch.build.targets.wheel.shared-data]
+"jupyterlite_scheme_kernel/labextension" = "share/jupyter/labextensions/jupyterlite-scheme-kernel"

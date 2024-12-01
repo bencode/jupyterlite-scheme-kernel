@@ -1,0 +1,60 @@
+{
+  "name": "jupyterlite-scheme-kernel",
+  "version": "0.1.1",
+  "private": true,
+  "description": "A Scheme Kernel for JupyterLite Using `sci`",
+  "keywords": [
+    "jupyter",
+    "jupyterlab",
+    "jupyterlite",
+    "jupyterlite-extension"
+  ],
+  "files": [
+    "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}"
+  ],
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "scripts": {
+    "build": "npm run build:lib && npm run build:labextension",
+    "build:lib": "tsc",
+    "build:labextension": "jupyter labextension build .",
+    "clean": "rimraf lib tsconfig.tsbuildinfo",
+    "watch": "tsc -w"
+  },
+  "dependencies": {
+    "@jupyterlab/services": "^7.0.0",
+    "@jupyterlite/kernel": "^0.4.0",
+    "@jupyterlite/server": "^0.4.4",
+    "chez": "workspace:^"
+  },
+  "devDependencies": {
+    "@jupyterlab/builder": "^4.3.1",
+    "prettier": "^3.3.3",
+    "rimraf": "^5.0.0",
+    "typescript": "^5.6.3"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "jupyterlab": {
+    "extension": true,
+    "outputDir": "../../jupyterlite_scheme_kernel/labextension",
+    "sharedPackages": {
+      "@jupyterlite/kernel": {
+        "bundled": false,
+        "singleton": true
+      },
+      "@jupyterlite/server": {
+        "bundled": false,
+        "singleton": true
+      },
+      "@jupyterlite/contents": {
+        "bundled": false,
+        "singleton": true
+      }
+    }
+  },
+  "jupyterlite": {
+    "liteExtension": true
+  }
+}

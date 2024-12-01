@@ -1,0 +1,9 @@
+{
+  "name": "jupyterlite-scheme-kernel-workspace",
+  "private": true,
+  "version": "0.1.1",
+  "scripts": {
+    "dev:install": "jupyter labextension develop . --overwrite",
+    "dev:build": "jupyter lite build"
+  }
+}
