@@ -1,6 +1,6 @@
 export function createEvaluator() {
-  const evaluate = (code: string) => {
-
+  const evaluate = code => {
+    return "ok"
   }
   return { evaluate }
 }
