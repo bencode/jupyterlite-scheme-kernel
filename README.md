@@ -16,8 +16,6 @@ pip install jupyterlite-scheme-kernel-canary
 2. Add the Scheme kernel
 3. Create a new notebook with Scheme kernel
 
-## Development
-
 ## Examples
 
 [Using Scheme In Jupyterlite](https://bencode.github.io/code/notebooks/index.html?path=using-scheme-in-jupyterlite.ipynb)
