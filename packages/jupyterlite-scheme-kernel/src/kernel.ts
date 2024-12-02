@@ -15,7 +15,7 @@ export class SchemeKernel extends BaseKernel implements IKernel {
   async kernelInfoRequest(): Promise<KernelMessage.IInfoReplyMsg['content']> {
     return {
       implementation: 'Scheme',
-      implementation_version: '0.2.0',
+      implementation_version: '0.3.0',
       language_info: {
         codemirror_mode: {
           name: 'scheme',
