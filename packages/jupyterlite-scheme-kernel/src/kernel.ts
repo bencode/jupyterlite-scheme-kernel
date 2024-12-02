@@ -3,6 +3,8 @@ import { BaseKernel, IKernel } from '@jupyterlite/kernel'
 import { type Evaluator, createEvaluator } from 'chez'
 import { library } from './library.scm'
 
+type MessageObject = { type: string; message: string }
+
 export class SchemeKernel extends BaseKernel implements IKernel {
   private evaluator: Evaluator | undefined
 
@@ -42,7 +44,13 @@ export class SchemeKernel extends BaseKernel implements IKernel {
     const { code } = content
     try {
       if (!this.evaluator) {
-        this.evaluator = await createEvaluator()
+        const onMessage = (info: MessageObject) => {
+          const name = info.type === 'error' ? 'stderr' : 'stdout'
+          const text = `${info.message}\n`
+          this.stream({ name, text })
+        }
+
+        this.evaluator = await createEvaluator({ onMessage })
         this.evaluator.install(library)
       }
       const result = this.evaluator.evaluate(code)

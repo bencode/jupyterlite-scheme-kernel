@@ -7,5 +7,8 @@ declare module 'chez' {
     success: boolean
     value: string
   }
-  export function createEvaluator(): Promise<Evaluator>
+  export type CreateOptions = {
+    onMessage: (bundle: { type: string; message: string }) => void
+  }
+  export function createEvaluator(opts: CreateOptions): Promise<Evaluator>
 }

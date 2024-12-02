@@ -1,10 +1,20 @@
 import SchemeModule from './scheme'
 
-export async function createEvaluator() {
+export async function createEvaluator(opts) {
   const dataUrl = new URL('scheme.data', import.meta.url).href
   const wasmUrl = new URL('scheme.wasm', import.meta.url).href;
 
   const module = await SchemeModule({
+    print: message => {
+      console.log(message)
+      opts?.onMessage({ type: 'log', message })
+    },
+
+    printErr: message => {
+      console.error(message)
+      opts?.onMessage({ type: 'error', message })
+    },
+
     locateFile: name => {
       if (name === 'scheme.data') {
         return dataUrl
