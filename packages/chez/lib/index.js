@@ -17,8 +17,12 @@ export async function createEvaluator() {
   })
   const evaluator = new module.SchemeEvaluator()
 
+  const install = code => {
+    evaluator.execute(code)
+  }
+
   const evaluate = code => {
     return evaluator.evaluate(code)
   }
-  return { evaluate }
+  return { install, evaluate }
 }

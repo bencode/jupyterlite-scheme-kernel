@@ -1,8 +1,8 @@
 {
   "name": "jupyterlite-scheme-kernel",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "private": true,
-  "description": "A Scheme Kernel for JupyterLite Using `sci`",
+  "description": "A Scheme Kernel for JupyterLite Using `ChezScheme`",
   "keywords": [
     "jupyter",
     "jupyterlab",

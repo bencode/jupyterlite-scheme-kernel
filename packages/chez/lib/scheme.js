@@ -39,7 +39,7 @@ var ENVIRONMENT_IS_SHELL = false;
 
 // --pre-jses are emitted after the Module integration code, so that they can
 // refer to Module (if they choose; they can also define Module)
-// include: /var/folders/6b/w6bfz8hd09ggknz1d0rbphd00000gn/T/tmp9xs1csxm.js
+// include: /var/folders/6b/w6bfz8hd09ggknz1d0rbphd00000gn/T/tmpe3053ev4.js
 
   Module['expectedDataFileDownloads'] ??= 0;
   Module['expectedDataFileDownloads']++;
@@ -209,7 +209,7 @@ var REMOTE_PACKAGE_SIZE = metadata['remote_package_size'];
 
   })();
 
-// end include: /var/folders/6b/w6bfz8hd09ggknz1d0rbphd00000gn/T/tmp9xs1csxm.js
+// end include: /var/folders/6b/w6bfz8hd09ggknz1d0rbphd00000gn/T/tmpe3053ev4.js
 
 
 // Sometimes an existing Module object exists with properties
@@ -4059,24 +4059,21 @@ var tempI64;
       abort('');
     };
 
-  var __embind_register_bigint = (primitiveType, name, size, minRange, maxRange) => {};
-
-  var embind_init_charCodes = () => {
-      var codes = new Array(256);
-      for (var i = 0; i < 256; ++i) {
-          codes[i] = String.fromCharCode(i);
+  var structRegistrations = {
+  };
+  
+  var runDestructors = (destructors) => {
+      while (destructors.length) {
+        var ptr = destructors.pop();
+        var del = destructors.pop();
+        del(ptr);
       }
-      embind_charCodes = codes;
     };
-  var embind_charCodes;
-  var readLatin1String = (ptr) => {
-      var ret = "";
-      var c = ptr;
-      while (HEAPU8[c]) {
-          ret += embind_charCodes[HEAPU8[c++]];
-      }
-      return ret;
-    };
+  
+  /** @suppress {globalThis} */
+  function readPointer(pointer) {
+      return this['fromWireType'](HEAPU32[((pointer)>>2)]);
+    }
   
   var awaitingDependencies = {
   };
@@ -4086,12 +4083,6 @@ var tempI64;
   
   var typeDependencies = {
   };
-  
-  var BindingError;
-  var throwBindingError = (message) => { throw new BindingError(message); };
-  
-  
-  
   
   var InternalError;
   var throwInternalError = (message) => { throw new InternalError(message); };
@@ -4132,6 +4123,94 @@ var tempI64;
         onComplete(typeConverters);
       }
     };
+  var __embind_finalize_value_object = (structType) => {
+      var reg = structRegistrations[structType];
+      delete structRegistrations[structType];
+  
+      var rawConstructor = reg.rawConstructor;
+      var rawDestructor = reg.rawDestructor;
+      var fieldRecords = reg.fields;
+      var fieldTypes = fieldRecords.map((field) => field.getterReturnType).
+                concat(fieldRecords.map((field) => field.setterArgumentType));
+      whenDependentTypesAreResolved([structType], fieldTypes, (fieldTypes) => {
+        var fields = {};
+        fieldRecords.forEach((field, i) => {
+          var fieldName = field.fieldName;
+          var getterReturnType = fieldTypes[i];
+          var getter = field.getter;
+          var getterContext = field.getterContext;
+          var setterArgumentType = fieldTypes[i + fieldRecords.length];
+          var setter = field.setter;
+          var setterContext = field.setterContext;
+          fields[fieldName] = {
+            read: (ptr) => getterReturnType['fromWireType'](getter(getterContext, ptr)),
+            write: (ptr, o) => {
+              var destructors = [];
+              setter(setterContext, ptr, setterArgumentType['toWireType'](destructors, o));
+              runDestructors(destructors);
+            }
+          };
+        });
+  
+        return [{
+          name: reg.name,
+          'fromWireType': (ptr) => {
+            var rv = {};
+            for (var i in fields) {
+              rv[i] = fields[i].read(ptr);
+            }
+            rawDestructor(ptr);
+            return rv;
+          },
+          'toWireType': (destructors, o) => {
+            // todo: Here we have an opportunity for -O3 level "unsafe" optimizations:
+            // assume all fields are present without checking.
+            for (var fieldName in fields) {
+              if (!(fieldName in o)) {
+                throw new TypeError(`Missing field: "${fieldName}"`);
+              }
+            }
+            var ptr = rawConstructor();
+            for (fieldName in fields) {
+              fields[fieldName].write(ptr, o[fieldName]);
+            }
+            if (destructors !== null) {
+              destructors.push(rawDestructor, ptr);
+            }
+            return ptr;
+          },
+          argPackAdvance: GenericWireTypeSize,
+          'readValueFromPointer': readPointer,
+          destructorFunction: rawDestructor,
+        }];
+      });
+    };
+
+  var __embind_register_bigint = (primitiveType, name, size, minRange, maxRange) => {};
+
+  var embind_init_charCodes = () => {
+      var codes = new Array(256);
+      for (var i = 0; i < 256; ++i) {
+          codes[i] = String.fromCharCode(i);
+      }
+      embind_charCodes = codes;
+    };
+  var embind_charCodes;
+  var readLatin1String = (ptr) => {
+      var ret = "";
+      var c = ptr;
+      while (HEAPU8[c]) {
+          ret += embind_charCodes[HEAPU8[c++]];
+      }
+      return ret;
+    };
+  
+  
+  
+  
+  var BindingError;
+  var throwBindingError = (message) => { throw new BindingError(message); };
+  
   /** @param {Object=} options */
   function sharedRegisterType(rawType, registeredInstance, options = {}) {
       var name = registeredInstance.name;
@@ -4691,10 +4770,6 @@ var tempI64;
     }
   
   
-  /** @suppress {globalThis} */
-  function readPointer(pointer) {
-      return this['fromWireType'](HEAPU32[((pointer)>>2)]);
-    }
   
   
   var init_RegisteredPointer = () => {
@@ -4996,13 +5071,6 @@ var tempI64;
     };
   
   
-  var runDestructors = (destructors) => {
-      while (destructors.length) {
-        var ptr = destructors.pop();
-        var del = destructors.pop();
-        del(ptr);
-      }
-    };
   
   
   
@@ -5767,6 +5835,49 @@ var tempI64;
     };
 
   
+  
+  var __embind_register_value_object = (
+      rawType,
+      name,
+      constructorSignature,
+      rawConstructor,
+      destructorSignature,
+      rawDestructor
+    ) => {
+      structRegistrations[rawType] = {
+        name: readLatin1String(name),
+        rawConstructor: embind__requireFunction(constructorSignature, rawConstructor),
+        rawDestructor: embind__requireFunction(destructorSignature, rawDestructor),
+        fields: [],
+      };
+    };
+
+  
+  
+  var __embind_register_value_object_field = (
+      structType,
+      fieldName,
+      getterReturnType,
+      getterSignature,
+      getter,
+      getterContext,
+      setterArgumentType,
+      setterSignature,
+      setter,
+      setterContext
+    ) => {
+      structRegistrations[structType].fields.push({
+        fieldName: readLatin1String(fieldName),
+        getterReturnType,
+        getter: embind__requireFunction(getterSignature, getter),
+        getterContext,
+        setterArgumentType,
+        setter: embind__requireFunction(setterSignature, setter),
+        setterContext,
+      });
+    };
+
+  
   var __embind_register_void = (rawType, name) => {
       name = readLatin1String(name);
       registerType(rawType, {
@@ -6280,9 +6391,9 @@ var tempI64;
       /** @suppress {checkTypes} */
       MEMFS.doesNotExistError.stack = '<generic error, no stack>';
       ;
+InternalError = Module['InternalError'] = class InternalError extends Error { constructor(message) { super(message); this.name = 'InternalError'; }};
 embind_init_charCodes();
 BindingError = Module['BindingError'] = class BindingError extends Error { constructor(message) { super(message); this.name = 'BindingError'; }};
-InternalError = Module['InternalError'] = class InternalError extends Error { constructor(message) { super(message); this.name = 'InternalError'; }};
 init_ClassHandle();
 init_RegisteredPointer();
 UnboundTypeError = Module['UnboundTypeError'] = extendError(Error, 'UnboundTypeError');;
@@ -6335,6 +6446,8 @@ var wasmImports = {
   /** @export */
   _abort_js: __abort_js,
   /** @export */
+  _embind_finalize_value_object: __embind_finalize_value_object,
+  /** @export */
   _embind_register_bigint: __embind_register_bigint,
   /** @export */
   _embind_register_bool: __embind_register_bool,
@@ -6356,6 +6469,10 @@ var wasmImports = {
   _embind_register_std_string: __embind_register_std_string,
   /** @export */
   _embind_register_std_wstring: __embind_register_std_wstring,
+  /** @export */
+  _embind_register_value_object: __embind_register_value_object,
+  /** @export */
+  _embind_register_value_object_field: __embind_register_value_object_field,
   /** @export */
   _embind_register_void: __embind_register_void,
   /** @export */

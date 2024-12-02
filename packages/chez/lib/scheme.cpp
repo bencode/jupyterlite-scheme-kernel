@@ -4,6 +4,14 @@
 
 using namespace emscripten;
 
+struct EvalResult {
+    bool success;
+    std::string value;
+    
+    EvalResult() : success(false), value("") {}
+    EvalResult(bool s, const std::string& v) : success(s), value(v) {}
+};
+
 class SchemeEvaluator {
 public:
     SchemeEvaluator() {
@@ -12,26 +20,50 @@ public:
 
         ptr interaction_environment = Stop_level_value(Sstring_to_symbol("interaction-environment"));
         env = Scall0(interaction_environment);
-
-        _evaluate("(define (write-to-string value) (with-output-to-string (lambda () (write value))))");
     }
 
-    ptr _evaluate(const std::string& code) {
+    void execute(const std::string&code) {
         ptr open_input_string = Stop_level_value(Sstring_to_symbol("open-input-string"));
         ptr read = Stop_level_value(Sstring_to_symbol("read"));
         ptr eval = Stop_level_value(Sstring_to_symbol("eval"));
-
         ptr port = Scall1(open_input_string, Sstring(code.c_str()));
         ptr expr = Scall1(read, port);
-
-        return Scall2(eval, expr, env);
+        Scall2(eval, expr, env);
     }
 
-    std::string evaluate(const std::string& code) {
-        ptr result = _evaluate(code);
+    EvalResult evaluate(const std::string& code) {
+        ptr open_input_string = Stop_level_value(Sstring_to_symbol("open-input-string"));
+        ptr read = Stop_level_value(Sstring_to_symbol("safe-read"));
+        ptr eval = Stop_level_value(Sstring_to_symbol("safe-eval"));
+        ptr get_last_error = Stop_level_value(Sstring_to_symbol("get-last-error"));
         ptr write_to_string = Stop_level_value(Sstring_to_symbol("write-to-string"));
-        ptr result_string = Scall1(write_to_string, result);
-        return extract_scheme_string(result_string);
+
+        ptr port = Scall1(open_input_string, Sstring(code.c_str()));
+        ptr last_result = Sfalse;
+
+        while (true) {
+            ptr expr = Scall1(read, port);
+
+            ptr error = Scall0(get_last_error);
+            if (error != Sfalse) {
+                return EvalResult(false, extract_scheme_string(error));
+            }
+
+            if (expr == Seof_object) {
+                if (last_result == Sfalse) {
+                    return EvalResult(true, "");
+                }
+                ptr result_string = Scall1(write_to_string, last_result);
+                return EvalResult(true, extract_scheme_string(result_string));
+            }
+
+            last_result = Scall2(eval, expr, env);
+
+            error = Scall0(get_last_error);
+            if (error != Sfalse) {
+                return EvalResult(false, extract_scheme_string(error));
+            }
+        }
     }
 
     ~SchemeEvaluator() {
@@ -55,7 +87,12 @@ private:
 };
 
 EMSCRIPTEN_BINDINGS(scheme_eval) {
+   value_object<EvalResult>("EvalResult")
+        .field("success", &EvalResult::success)
+        .field("value", &EvalResult::value);
+
     class_<SchemeEvaluator>("SchemeEvaluator")
         .constructor<>()
+        .function("execute", &SchemeEvaluator::execute)
         .function("evaluate", &SchemeEvaluator::evaluate);
 }

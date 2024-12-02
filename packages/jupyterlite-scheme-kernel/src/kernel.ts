@@ -1,6 +1,7 @@
 import { KernelMessage } from '@jupyterlab/services'
 import { BaseKernel, IKernel } from '@jupyterlite/kernel'
 import { type Evaluator, createEvaluator } from 'chez'
+import { library } from './library.scm'
 
 export class SchemeKernel extends BaseKernel implements IKernel {
   private evaluator: Evaluator | undefined
@@ -12,7 +13,7 @@ export class SchemeKernel extends BaseKernel implements IKernel {
   async kernelInfoRequest(): Promise<KernelMessage.IInfoReplyMsg['content']> {
     return {
       implementation: 'Scheme',
-      implementation_version: '0.1.1',
+      implementation_version: '0.2.0',
       language_info: {
         codemirror_mode: {
           name: 'scheme',
@@ -42,21 +43,38 @@ export class SchemeKernel extends BaseKernel implements IKernel {
     try {
       if (!this.evaluator) {
         this.evaluator = await createEvaluator()
+        this.evaluator.install(library)
       }
       const result = this.evaluator.evaluate(code)
+      if (result.success) {
+        this.publishExecuteResult({
+          execution_count: this.executionCount,
+          data: {
+            'text/plain': result.value,
+          },
+          metadata: {},
+        })
 
-      this.publishExecuteResult({
-        execution_count: this.executionCount,
-        data: {
-          'text/plain': String(result),
-        },
-        metadata: {},
+        return {
+          status: 'ok',
+          execution_count: this.executionCount,
+          user_expressions: {},
+        }
+      }
+
+      const evalue = result.value
+      this.publishExecuteError({
+        ename: 'Evaluation Error',
+        evalue,
+        traceback: [],
       })
 
       return {
-        status: 'ok',
+        status: 'error',
         execution_count: this.executionCount,
-        user_expressions: {},
+        ename: 'Evaluation Error',
+        evalue,
+        traceback: [],
       }
     } catch (e) {
       const error = e as Error
