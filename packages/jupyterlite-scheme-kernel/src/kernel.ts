@@ -15,7 +15,7 @@ export class SchemeKernel extends BaseKernel implements IKernel {
   async kernelInfoRequest(): Promise<KernelMessage.IInfoReplyMsg['content']> {
     return {
       implementation: 'Scheme',
-      implementation_version: '0.3.0',
+      implementation_version: '0.4.0',
       language_info: {
         codemirror_mode: {
           name: 'scheme',
@@ -43,6 +43,23 @@ export class SchemeKernel extends BaseKernel implements IKernel {
   ): Promise<KernelMessage.IExecuteReplyMsg['content']> {
     const { code } = content
     try {
+      const reHTML = /^\s*%%html\s/
+      if (reHTML.test(code)) {
+        const html = code.replace(reHTML, '')
+        this.publishExecuteResult({
+          execution_count: this.executionCount,
+          data: {
+            'text/html': html,
+          },
+          metadata: {},
+        })
+        return {
+          status: 'ok',
+          execution_count: this.executionCount,
+          user_expressions: {},
+        }
+      }
+
       if (!this.evaluator) {
         const onMessage = (info: MessageObject) => {
           const name = info.type === 'error' ? 'stderr' : 'stdout'
