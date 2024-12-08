@@ -50,9 +50,6 @@ public:
             }
 
             if (expr == Seof_object) {
-                if (last_result == Sfalse) {
-                    return EvalResult(true, "");
-                }
                 ptr result_string = Scall1(write_to_string, last_result);
                 return EvalResult(true, extract_scheme_string(result_string));
             }
