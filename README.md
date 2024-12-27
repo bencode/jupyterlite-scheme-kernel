@@ -10,7 +10,7 @@ pip install jupyterlite-scheme-kernel-canary
 
 ## Examples
 
-[Using Scheme In Jupyterlite](https://bencode.github.io/code/notebooks/index.html?path=using-scheme-in-jupyterlite.ipynb)
+[Using Scheme In Jupyterlite](https://www.qijun.io/notebooks/index.html?path=using-scheme-in-jupyterlite.ipynb)
 
 ## License
 
